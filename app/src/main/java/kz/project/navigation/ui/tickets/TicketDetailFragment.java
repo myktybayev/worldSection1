@@ -3,6 +3,7 @@ package kz.project.navigation.ui.tickets;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -67,14 +68,18 @@ public class TicketDetailFragment extends Fragment {
         tSeat.setText("Seat: "+ticket.getSeat());
 
         btn_download.setOnClickListener(view -> {
-//            Toast.makeText(getActivity(), "Download", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Download", Toast.LENGTH_SHORT).show();
 
 //            savebitmap();
 
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+
+                Toast.makeText(getActivity(), "requestPermissions", Toast.LENGTH_SHORT).show();
 
                 requestPermissions( //Method of Fragment
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_AUDIO,
+                        Manifest.permission.READ_MEDIA_VIDEO},
                         138
                 );
             } else {
@@ -90,14 +95,14 @@ public class TicketDetailFragment extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 138) {
-            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (permissions[0].equals(Manifest.permission.READ_MEDIA_IMAGES)
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 savebitmap();
             }
         }
     }
 
-
+    @SuppressLint("SetWorldReadable")
     public void savebitmap() {
         View imgView = getActivity().getWindow().getDecorView().getRootView();
         Bitmap bitmap = Bitmap.createBitmap(imgView.getWidth(), imgView.getHeight() / 2 + 180, Bitmap.Config.RGB_565);
@@ -114,10 +119,14 @@ public class TicketDetailFragment extends Fragment {
 //        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
 
         File dir = Environment.getExternalStorageDirectory();
-        String directory = dir.toString()+"/Pictures/";
+        String directory = dir.toString()+"/Download/";
 
         String date = new SimpleDateFormat("hhmmss", Locale.getDefault()).format(new Date());
-        File file = new File(directory, "tickets" + date + ".jpg");
+        File file = new File(directory, "tickets" + date + ".png");
+
+        file.setExecutable(true, false);
+        file.setReadable(true, false);
+        file.setWritable(true, false);
 
         if (!file.exists()) {
             img_path.setText("Image path: "+file.toString());
@@ -125,7 +134,7 @@ public class TicketDetailFragment extends Fragment {
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
                 fos.flush();
                 fos.close();
             } catch (IOException e) {
