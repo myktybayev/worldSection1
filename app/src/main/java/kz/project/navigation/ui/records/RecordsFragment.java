@@ -1,8 +1,12 @@
 package kz.project.navigation.ui.records;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -16,10 +20,15 @@ import android.widget.Button;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import kz.project.navigation.R;
 
@@ -28,9 +37,9 @@ public class RecordsFragment extends Fragment {
     Button startButton;
     Button stopButton;
     Button btn_submit;
-    MediaRecorder recorder;
-    File audiofile = null;
-    static final String TAG = "MediaRecording";
+    private MediaRecorder mediaRecorder;
+    private MediaPlayer mediaPlayer;
+    private String fileName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,15 +48,21 @@ public class RecordsFragment extends Fragment {
         stopButton = view.findViewById(R.id.btn_voice_play);
         btn_submit = view.findViewById(R.id.btn_submit);
 
-        recorder = new MediaRecorder();
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    startRecording();
 
-                } catch (IOException e) {
-                    Log.e(TAG, "external storage access error");
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                    Log.i("record", "requestPermissions");
+
+                    requestPermissions( //Method of Fragment
+                            new String[]{Manifest.permission.RECORD_AUDIO,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            138
+                    );
+                } else {
+                    recordStart();
                 }
             }
         });
@@ -55,58 +70,97 @@ public class RecordsFragment extends Fragment {
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopRecording();
+                recordStop();
             }
         });
 
         return view;
     }
 
-    public void startRecording() throws IOException {
-        startButton.setEnabled(false);
-        stopButton.setEnabled(true);
-        //Creating file
-        File dir = Environment.getExternalStorageDirectory();
-        try {
-            audiofile = File.createTempFile("sound", ".3gp", dir);
-        } catch (IOException e) {
-            Log.e(TAG, "external storage access error");
-            return;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 138) {
+            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                recordStart();
+            }
         }
-        //Creating MediaRecorder and specifying audio source, output format, encoder & output format
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recorder.setOutputFile(audiofile.getAbsolutePath());
-        recorder.prepare();
-        recorder.start();
     }
 
-    public void stopRecording() {
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
-        //stopping recorder
-        recorder.stop();
-        recorder.release();
-        //after stopping the recorder, create the sound file and add it to media library.
-        addRecordingToMediaLibrary();
+    public void recordStart() {
+        try {
+            Log.i("record", "recordStart");
+            releaseRecorder();
+
+            /*
+            fileName = Environment.getExternalStorageDirectory() + "/Recordings/record.3gpp";
+            File outFile = new File(fileName);
+
+            String dirPath = context.getExternalFilesDir(null).getAbsolutePath();
+            String filePath = direPath + "/recording";
+            audioFile = new File(filePath);
+
+             */
+            
+            ContextWrapper cw = new ContextWrapper(getContext());
+            File musicDirectory = cw.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+
+//            if (!outFile.exists()) {
+//                outFile.mkdir();
+//            }
+
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.setOutputFile(musicDirectory);
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+
+            Log.i("record", "fileName: "+fileName.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
-    protected void addRecordingToMediaLibrary() {
-        ContentValues values = new ContentValues(4);
-        long current = System.currentTimeMillis();
-        values.put(MediaStore.Audio.Media.TITLE, "audio" + audiofile.getName());
-        values.put(MediaStore.Audio.Media.DATE_ADDED, (int) (current / 1000));
-        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/3gpp");
-        values.put(MediaStore.Audio.Media.DATA, audiofile.getAbsolutePath());
+    public void recordStop() {
 
-        ContentResolver contentResolver = getActivity().getContentResolver();
-        Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Uri newUri = contentResolver.insert(base, values);
+        Log.i("record", "recordStop");
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+        }
+    }
 
-        //sending broadcast message to scan the media file so that it can be available
-//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, newUri));
-//        Toast.makeText(this, "Added File " + newUri, Toast.LENGTH_LONG).show();
+    public void playStart() {
+        try {
+            releasePlayer();
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(fileName);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void playStop(View v) {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+        }
+    }
+
+    private void releaseRecorder() {
+        if (mediaRecorder != null) {
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+    }
+
+    private void releasePlayer() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }

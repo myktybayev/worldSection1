@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "kz.project.navigation"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -118,15 +119,9 @@ public class TicketDetailFragment extends Fragment {
         ContextWrapper cw = new ContextWrapper(getContext());
 //        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
 
-        File dir = Environment.getExternalStorageDirectory();
-        String directory = dir.toString()+"/Download/";
-
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         String date = new SimpleDateFormat("hhmmss", Locale.getDefault()).format(new Date());
-        File file = new File(directory, "tickets" + date + ".png");
-
-        file.setExecutable(true, false);
-        file.setReadable(true, false);
-        file.setWritable(true, false);
+        File file = new File(dir+"/", "tickets" + date + ".png");
 
         if (!file.exists()) {
             img_path.setText("Image path: "+file.toString());
@@ -135,6 +130,7 @@ public class TicketDetailFragment extends Fragment {
             try {
                 fos = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+
                 fos.flush();
                 fos.close();
             } catch (IOException e) {
