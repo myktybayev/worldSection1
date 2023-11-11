@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="events"
+        android:enabled="true"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:shortcutShortLabel="@string/events">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="kz.project.navigation"
+            android:targetClass="kz.project.navigation.MainActivity">
+
+            <extra android:name="content_key" android:value="events" />
+        </intent>
+
+
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="tickets"
+        android:enabled="true"
+        android:icon="@drawable/baseline_note_alt_24"
+        android:shortcutShortLabel="@string/tickets">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="kz.project.navigation"
+            android:targetClass="kz.project.navigation.MainActivity">
+
+            <extra android:name="content_key" android:value="tickets" />
+        </intent>
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="records"
+        android:enabled="true"
+        android:icon="@drawable/baseline_emergency_recording_24"
+        android:shortcutShortLabel="@string/records">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="kz.project.navigation"
+            android:targetClass="kz.project.navigation.MainActivity">
+
+            <extra android:name="content_key" android:value="records" />
+        </intent>
+
+
+    </shortcut>
+</shortcuts>

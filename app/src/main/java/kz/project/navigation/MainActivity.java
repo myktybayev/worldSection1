@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import kz.project.navigation.ui.events.EventsFragment;
 import kz.project.navigation.ui.records.RecordsFragment;
@@ -43,11 +44,9 @@ public class MainActivity extends AppCompatActivity {
         tv_events.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 tv_events.setTextColor(getColor(R.color.red));
                 tv_tickets.setTextColor(getColor(R.color.black));
                 tv_records.setTextColor(getColor(R.color.black));
-
                 switchFragment(new EventsFragment());
             }
         });
@@ -73,6 +72,33 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String fragmentName = intent.getStringExtra("fragmentName");
+        String shortcutExtra = intent.getStringExtra("content_key");
+
+        if (shortcutExtra != null){
+            switch (shortcutExtra) {
+                case "events":
+                    tv_events.setTextColor(getColor(R.color.red));
+                    tv_tickets.setTextColor(getColor(R.color.black));
+                    tv_records.setTextColor(getColor(R.color.black));
+                    switchFragment(new EventsFragment());
+                    break;
+
+                case "tickets":
+                    tv_tickets.setTextColor(getColor(R.color.red));
+                    tv_events.setTextColor(getColor(R.color.black));
+                    tv_records.setTextColor(getColor(R.color.black));
+                    switchFragment(new TicketsFragment());
+
+                    break;
+                case "records":
+                    tv_events.setTextColor(getColor(R.color.black));
+                    tv_tickets.setTextColor(getColor(R.color.black));
+                    tv_records.setTextColor(getColor(R.color.red));
+                    switchFragment(new RecordsFragment());
+
+                    break;
+            }
+        }
 
         if (fragmentName != null) {
             switch (fragmentName) {

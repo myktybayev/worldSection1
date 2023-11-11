@@ -3,17 +3,20 @@ package kz.project.navigation.ui.tickets;
 import static androidx.core.content.PermissionChecker.checkSelfPermission;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,37 +67,36 @@ public class TicketDetailFragment extends Fragment {
         tSeat.setText("Seat: "+ticket.getSeat());
 
         btn_download.setOnClickListener(view -> {
-            Toast.makeText(getActivity(), "Download", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getActivity(), "Download", Toast.LENGTH_SHORT).show();
 
-            savebitmap();
+//            savebitmap();
 
-            if (ActivityCompat.checkSelfPermission(getContext(),
-                    android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(getContext(),
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(
-                        new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                                android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        103);
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                requestPermissions( //Method of Fragment
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        138
+                );
             } else {
                 savebitmap();
             }
+
+
         });
         return view;
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == rCode) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 138) {
+            if (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 savebitmap();
-            } else {
-                Toast.makeText(getActivity(), "Permission denied. Cannot write to external storage.", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
 
     public void savebitmap() {
         View imgView = getActivity().getWindow().getDecorView().getRootView();
@@ -102,15 +104,24 @@ public class TicketDetailFragment extends Fragment {
         Canvas canvas = new Canvas(bitmap);
         imgView.draw(canvas);
 
-        ContextWrapper cw = new ContextWrapper(getContext());
-        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        Dialog dialog = new Dialog(getActivity());
+        dialog.setContentView(R.layout.screenshot_dialog);
+        ImageView imageView = dialog.findViewById(R.id.dialogImage);
+        imageView.setImageBitmap(bitmap);
+        dialog.show();
 
-        String date = new SimpleDateFormat("yyyyMMddhhmmss", Locale.getDefault()).format(new Date());
+        ContextWrapper cw = new ContextWrapper(getContext());
+//        File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
+
+        File dir = Environment.getExternalStorageDirectory();
+        String directory = dir.toString()+"/Pictures/";
+
+        String date = new SimpleDateFormat("hhmmss", Locale.getDefault()).format(new Date());
         File file = new File(directory, "tickets" + date + ".jpg");
 
         if (!file.exists()) {
-            Log.d("path", file.toString());
-            img_path.setText(file.toString());
+            img_path.setText("Image path: "+file.toString());
+
             FileOutputStream fos = null;
             try {
                 fos = new FileOutputStream(file);

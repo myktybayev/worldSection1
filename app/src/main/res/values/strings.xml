@@ -8,4 +8,7 @@
         <item>Opening ceremony</item>
     </string-array>
 
+    <string name="events">Events</string>
+    <string name="tickets">Tickets</string>
+    <string name="records">Records</string>
 </resources>
