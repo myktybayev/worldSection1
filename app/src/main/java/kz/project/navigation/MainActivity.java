@@ -11,10 +11,9 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import kz.project.navigation.ui.events.EventsFragment;
-import kz.project.navigation.ui.records.RecordsFragment;
+import kz.project.navigation.ui.records.AudioRecordPlayFragment;
 import kz.project.navigation.ui.tickets.AddNewTicketFragment;
 import kz.project.navigation.ui.tickets.Ticket;
 import kz.project.navigation.ui.tickets.TicketDetailFragment;
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 tv_events.setTextColor(getColor(R.color.black));
                 tv_tickets.setTextColor(getColor(R.color.black));
                 tv_records.setTextColor(getColor(R.color.red));
-                switchFragment(new RecordsFragment());
+                switchFragment(new AudioRecordPlayFragment());
             }
         });
 
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                     tv_events.setTextColor(getColor(R.color.black));
                     tv_tickets.setTextColor(getColor(R.color.black));
                     tv_records.setTextColor(getColor(R.color.red));
-                    switchFragment(new RecordsFragment());
+                    switchFragment(new AudioRecordPlayFragment());
 
                     break;
             }

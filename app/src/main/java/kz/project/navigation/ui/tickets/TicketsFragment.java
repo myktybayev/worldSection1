@@ -88,6 +88,7 @@ public class TicketsFragment extends Fragment implements ItemClick {
             InputStream is = getActivity().getAssets().open("events.json");
             int size = is.available();
             byte[] buffer = new byte[size];
+
             is.read(buffer);
             is.close();
             json = new String(buffer, "UTF-8");

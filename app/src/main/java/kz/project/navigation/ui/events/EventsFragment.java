@@ -31,7 +31,6 @@ import kz.project.navigation.R;
 
 public class EventsFragment extends Fragment implements ItemClick {
 
-    TextView textView;
     EventsAdapter eventsAdapter;
     List<EventsItem> eventsItemList = new ArrayList<>();
     List<EventsItem> eventsItemListAll = new ArrayList<>();
@@ -118,8 +117,6 @@ public class EventsFragment extends Fragment implements ItemClick {
         try {
             JSONObject obj = new JSONObject(loadJSONFromAsset());
             JSONArray m_jArry = obj.getJSONArray("events");
-            ArrayList<HashMap<String, String>> formList = new ArrayList<>();
-            HashMap<String, String> m_li;
 
             for (int i = 0; i < m_jArry.length(); i++) {
                 JSONObject jo_inside = m_jArry.getJSONObject(i);
@@ -135,8 +132,6 @@ public class EventsFragment extends Fragment implements ItemClick {
                 for (int j = 0; j < jsonArrayArr.length(); j++) {
 
                     images.add(jsonArrayArr.getString(j));
-                    Log.i("info_json", "image: " + images.get(j));
-
                 }
 
                 eventsItemListAll.add(new EventsItem(
